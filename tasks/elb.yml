@@ -1,0 +1,22 @@
+- local_action:
+    module: ec2_elb_lb
+    name: "public-facing-LB"
+    state: present
+    security_group_names: vpc
+    subnets:
+      - "{{ vpc_subnet_ids.public_a }}"
+      - "{{ vpc_subnet_ids.public_b }}"
+    listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_port: 80
+    health_check:
+        ping_protocol: http # options are http, https, ssl, tcp
+        ping_port: 80
+        ping_path: "/index.html" # not required for tcp or ssl
+        response_timeout: 5 # seconds
+        interval: 30 # seconds
+        unhealthy_threshold: 2
+        healthy_threshold: 10
+
+  register: elb

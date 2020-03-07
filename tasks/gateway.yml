@@ -1,0 +1,66 @@
+
+# Creating Internet gateway and NAT gateway for the VPC
+
+- name: creating internet gateway for public subnets
+  ec2_vpc_igw:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    vpc_id: "{{ vpc_id }}"
+  register: internet_gateway
+
+# Creating NAT Gateway for the private subnets to access internet securely
+
+- name: create NAT gateway
+  ec2_vpc_nat_gateway:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    subnet_id: "{{ vpc_subnet_ids.private_b }}"
+    region: "{{ region }}"
+    wait: yes
+    if_exist_do_not_create: true
+  register: nat  
+
+# Setting facts for gateways
+
+- name: "set facts: Gateway IDs and IP"
+  set_fact:
+    vpc_gateway_id: "{{ internet_gateway.gateway_id }}"
+    vpc_nat_gateway_id: "{{ nat.nat_gateway_id }}"
+    #vpc_nat_gateway_ip: "{{ nat.nat_gateway_addresses.public_ip }}"
+
+
+#Route Table configuration for private subnets through the Nat Gateway in the VPC
+
+
+- name: create route table for private subnets
+  ec2_vpc_route_table:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    vpc_id: "{{ vpc_id }}"
+    tags:
+      Name: "{{ vpc_name }}-private"
+    subnets:
+      - "{{ vpc_subnet_ids.private_a }}"
+      - "{{ vpc_subnet_ids.private_b }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ vpc_nat_gateway_id }}"
+
+
+#Route Table configuration for Public subnets through internet gateway  in the vpc
+
+- name: create route table for public subnets
+  ec2_vpc_route_table:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    vpc_id: "{{ vpc_id }}"
+    tags:
+      Name: "{{ vpc_name }}-public"
+    subnets:
+      - "{{ vpc_subnet_ids.public_a }}"
+      - "{{ vpc_subnet_ids.public_b }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ vpc_gateway_id }}"
+
+

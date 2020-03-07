@@ -1,0 +1,15 @@
+
+---
+
+# VPC name and key pair to login
+
+vpc_name: "VPC-Ansible"
+EC2_key: "Ansible-Key"
+
+aws_access_key: "AKIAW64MV4AAUCJEPPU4"
+aws_secret_key: "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"
+
+# AWS region and credentials encrypted using vault
+
+region: "eu-west-1"
+

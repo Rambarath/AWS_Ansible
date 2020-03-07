@@ -1,0 +1,25 @@
+- name: create autoscaling launch config
+  ec2_lc:
+    name: autoscaling_launchconfig
+    image_id: ami-0e034d00b655ff4c6
+    key_name: "{{ EC2_key }}"
+    region: "{{ region }}"
+    security_groups: [ 'vpc' ] 
+    instance_type: t2.micro
+    assign_public_ip: yes
+
+- ec2_asg:
+    name: AutoscalingGroup
+    launch_config_name: autoscaling_launchconfig
+    load_balancers: [ 'public-facing-LB' ]
+    vpc_zone_identifier:
+      - "{{ vpc_subnet_ids.public_a }}"
+      - "{{ vpc_subnet_ids.public_b }}"
+    health_check_period: 60
+    health_check_type: EC2
+    replace_all_instances: yes
+    min_size: 2
+    max_size: 5
+    desired_capacity: 2
+    region: "{{ region }}"
+  register: autoscaling

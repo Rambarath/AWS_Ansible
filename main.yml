@@ -1,0 +1,19 @@
+---
+
+- hosts: localhost
+  environment:
+    AWS_ACCESS_KEY_ID: "AKIAW64MV4AAUCJEPPU4"
+    AWS_SECRET_ACCESS_KEY: "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"
+    AWS_REGION: "{{ 'eu-west-1' }}"
+
+  tasks:
+    
+    - include_vars: all.yml
+    - include_vars: project.ansibled.yml
+    - include_vars: security_group.yml
+
+    - include_tasks: tasks/vpc.yml
+    - include_tasks: tasks/gateway.yml
+    - include_tasks: tasks/elb.yml
+    - include_tasks: tasks/autoscaling.yml
+

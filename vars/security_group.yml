@@ -1,0 +1,53 @@
+---
+
+# VPC
+vpc_cidr: 10.0.0.0/21
+
+#Private and Public subnets across 2 Az's
+
+vpc_subnets:
+        private_a:
+                cidr: 10.0.1.0/27
+                az: "{{region}}a"
+
+        public_a:
+                cidr: 10.0.2.0/27
+                az: "{{region}}a"
+
+        private_b:
+                cidr: 10.0.3.0/27
+                az: "{{region}}b"
+
+        public_b:
+                cidr: 10.0.4.0/27
+                az: "{{region}}b"
+
+# Below list show the security groups for the created VPC
+
+vpc_security_groups:
+  - name: vpc
+    description: "Rule for Allowing incoming traffic requests into VPC"
+    rules:
+      - proto: tcp
+        cidr_ip: 0.0.0.0/0
+        ports: 
+          - 80
+          - 8080
+          - 443         
+       
+  - name: allow-ssh
+    description: "Allowing all SSH connections"
+    rules:
+      - proto: tcp
+        cidr_ip: 0.0.0.0/0
+        ports:
+          - 22
+  - name: allow-http
+    description: "Allowing all web traffic connections"
+    rules:
+      - proto: tcp
+        cidr_ip: 0.0.0.0/0
+        ports:
+          - 80
+          - 8080
+          - 443
